@@ -1,0 +1,26 @@
+// All tuning numbers for Dustline live here.
+export const CFG = {
+  W: 960,
+  H: 600,
+  WORLD: { w: 2600, h: 2000 },
+  ROAD_W: 150,
+  HIGHWAY_W: 170,
+  HIGHWAY_Y: 1000,
+  AVENUES: [400, 1300, 2200],
+  STREETS: [400, 1600],
+  PLAYER: { walk: 175, r: 12, hp: 100 },
+  CAR: { maxSpeed: 330, accel: 270, brake: 420, turn: 2.4, w: 44, h: 22, mass: 1 },
+  TRUCK: { maxSpeed: 235, accel: 150, brake: 320, turn: 1.7, w: 64, h: 28, mass: 2.4 },
+  POLICE: { maxSpeed: 300, accel: 330, brake: 460, turn: 2.2, w: 46, h: 22, mass: 1.1 },
+  TRAFFIC_SPEED: 150,
+  PISTOL: { mag: 12, reload: 1.2, bulletSpeed: 720, damage: 34, range: 520 },
+  WANTED_DECAY: 12,
+  RAM_DAMAGE: 2,
+  RAM_IMMUNITY: 3,
+  STORM_CYCLE: 90,
+  STORM_LEN: 25,
+  COLORS: {
+    sand: '#d9b380', sand2: '#cfa66e', road: '#4a4038', roadEdge: '#6b5a48',
+    sidewalk: '#b99b6d', plaza: '#c8a06a', sky: '#f0e0c0',
+  },
+};

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dustline — desert highway town</title>
+<style>
+  :root { --amber:#ffb347; --sand:#d9b380; --red:#ff5544; --bg:#1a120a; --panel:#241a10; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: #f0e0c0; font-family: "Segoe UI", system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  header { width: 960px; max-width: 96vw; display: flex; justify-content: space-between; align-items: baseline; padding: 14px 4px 8px; }
+  h1 { font-size: 22px; letter-spacing: 3px; color: var(--amber); text-transform: uppercase; }
+  h1 b { color: #ff7a4a; }
+  .sub { font-size: 12px; color: #a89078; }
+  #wrap { position: relative; width: 960px; max-width: 96vw; }
+  canvas { display: block; width: 100%; background: #d9b380; border: 1px solid #4a3a28; border-radius: 8px; }
+  #hud { display: flex; gap: 8px; width: 960px; max-width: 96vw; padding: 8px 4px; font-size: 13px; flex-wrap: wrap; align-items: center; }
+  .pill { background: var(--panel); border: 1px solid #4a3a28; border-radius: 20px; padding: 4px 12px; white-space: nowrap; }
+  .pill b { color: var(--amber); }
+  #hud-objective { flex: 1; min-width: 220px; color: #ffd24a; }
+  .healthbar { width: 110px; height: 10px; background: #3a2a18; border-radius: 5px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 6px; }
+  #hud-health { display: block; height: 100%; width: 100%; background: #3dff8e; }
+  #toast { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); background: rgba(20,14,8,0.88); border: 1px solid var(--amber); color: #ffd24a; border-radius: 8px; padding: 8px 18px; font-size: 15px; display: none; z-index: 5; white-space: nowrap; }
+  #toast.show { display: block; }
+  .overlay { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: rgba(20,12,6,0.82); border-radius: 8px; text-align: center; padding: 20px; }
+  .overlay.show { display: flex; }
+  .overlay h2 { font-size: 36px; letter-spacing: 4px; color: var(--amber); text-transform: uppercase; }
+  .overlay h2.red { color: var(--red); }
+  .overlay p { max-width: 580px; color: #d8c8a8; font-size: 14px; line-height: 1.6; }
+  .overlay .big { font-size: 19px; color: #fff; }
+  .keys { font-size: 12px; color: #a89078; line-height: 1.8; }
+  .keys kbd { background: #3a2a18; border: 1px solid #6a5232; border-radius: 4px; padding: 1px 6px; color: #f0e0c0; font-family: inherit; }
+  button { background: var(--amber); color: #241505; border: none; border-radius: 6px; padding: 10px 26px; font-size: 16px; font-weight: 700; cursor: pointer; letter-spacing: 1px; }
+  button:hover { background: #ffc46b; }
+  button.ghost { background: transparent; color: var(--amber); border: 1px solid var(--amber); }
+  footer { width: 960px; max-width: 96vw; padding: 8px 4px 20px; font-size: 12px; color: #8a7a5a; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Dust<b>line</b></h1>
+  <div class="sub">open-world crime &middot; desert highway town</div>
+</header>
+<div id="wrap">
+  <canvas id="game" width="960" height="600"></canvas>
+  <div id="toast"></div>
+  <div class="overlay show" id="ov-title">
+    <h2>Dust<b>line</b></h2>
+    <p class="big">Rosa Vega, trucker-for-hire, owes the wrong people in a town that never cools down.</p>
+    <p>Haul the load to the quarry. Steal two cars for Rusty's chop shop. Then lose a five-star manhunt in a dust storm and make it home to The Barn. On foot or behind the wheel — the highway is yours, the law is not.</p>
+    <button id="btn-start">Start the haul</button>
+    <button class="ghost" id="btn-continue">Continue</button>
+    <div class="keys"><kbd>W A S D</kbd> move / drive &nbsp; <kbd>E</kbd> enter &amp; exit vehicle &nbsp; mouse aim, click shoot<br><kbd>P</kbd> pause &nbsp; <kbd>M</kbd> mute &nbsp; <kbd>R</kbd> restart &nbsp; progress saves automatically</div>
+  </div>
+  <div class="overlay" id="ov-pause">
+    <h2>Paused</h2>
+    <p>Press <kbd>P</kbd> to resume.</p>
+    <button class="ghost" id="btn-resume">Resume</button>
+  </div>
+  <div class="overlay" id="ov-busted">
+    <h2 class="red">Busted</h2>
+    <p class="big" id="busted-line">The officer cuffed you.</p>
+    <button id="btn-again-b">Walk out of the hospital</button>
+  </div>
+  <div class="overlay" id="ov-wasted">
+    <h2 class="red">Wasted</h2>
+    <p class="big" id="wasted-line">You wake up at the hospital.</p>
+    <button id="btn-again-w">Walk out of the hospital</button>
+  </div>
+</div>
+<div id="hud">
+  <span class="pill">Health <span class="healthbar"><span id="hud-health"></span></span></span>
+  <span class="pill"><b id="hud-money">$100</b></span>
+  <span class="pill"><b id="hud-wanted">☆☆☆☆☆</b></span>
+  <span class="pill">Ammo <b id="hud-ammo">12/12</b></span>
+  <span class="pill" id="hud-objective">Get in the truck at the truck stop</span>
+  <span class="pill" id="hud-marker"></span>
+  <span class="pill" id="hud-storm"></span>
+</div>
+<footer>
+  <span>Dustline &middot; a make.fun gta6-01 entry</span>
+  <span>WASD move &middot; E enter car &middot; click shoot</span>
+</footer>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
